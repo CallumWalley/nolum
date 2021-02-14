@@ -10,7 +10,7 @@ class Transaction(Base):
     __tablename__:"transaction"
 
     id = Column(Integer, primary_key=True)
-    input_string = Column(String) # Raw unedited string.
+    raw_string = Column(String) # Raw unedited string.
     input_source = Column(String) # Where come from
     to_account = Column(String)
     from_account = Column(String)

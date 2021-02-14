@@ -8,6 +8,7 @@ import plotly.express as px
 import pandas as pd
 import os
 import re
+import csv
 import urllib.request
 
 from dash.dependencies import Input, Output
@@ -18,11 +19,13 @@ dataPath = "data"
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 
+
 def get_bullshit():
     try:
-        return [html.Q(children=re.search(r'\n<li>(.*)</li>', urllib.request.urlopen('http://cbsg.sf.net').read().decode('UTF-8')).group(1)),html.P(children=' - Noel Zeng')] 
+        return [html.Q(children=re.search(r'\n<li>(.*)</li>', urllib.request.urlopen('http://cbsg.sf.net').read().decode('UTF-8')).group(1)), html.P(children=' - Noel Zeng')]
     except:
         return ":("
+
 
 app.layout = html.Div(children=[
     html.H1(children='NoLum Cloud-Native Deep-Learning Hyper-Ledger'),
@@ -36,7 +39,7 @@ app.layout = html.Div(children=[
                 dcc.Dropdown(
                     id='ingest-select-account',
                     className='account-selector',
-                    options = [{'label':'placeholder', 'value':'placeholder'}]
+                    options=[{'label': 'placeholder', 'value': 'placeholder'}]
                     # options=list(
                     #     map(lambda x: {'label': x, 'value': x}, os.listdir(dataPath))),
                 )
@@ -49,8 +52,9 @@ app.layout = html.Div(children=[
                     value=[]  # List of imported documents.
                 )
             ]),
-            html.Button('Ingest', id='ingest-button', n_clicks=0),
+            html.Button('Load', id='load-button', n_clicks=0),
             html.Div(id='ingest-tag-table'),
+            html.Button('Ingest', id='ingest-button', n_clicks=0),
             html.Div(id='ingested-data')
 
         ])
@@ -68,17 +72,77 @@ app.layout = html.Div(children=[
 
 @ app.callback(
     dash.dependencies.Output('ingest-tag-table', 'children'),
-    dash.dependencies.Input('ingest-button', 'n_clicks'),
+    dash.dependencies.Input('load-button', 'n_clicks'),
     dash.dependencies.State('ingest-list', 'value'))
+
 def update_output(clicks, input_files):
-    df_list= []
+    full_list = []
     for input_file in input_files:
-        df_list.append(pd.read_csv(os.path.join(dataPath,input_file)))
-    concatted_df=pd.concat(df_list, axis=0, ignore_index=True)
+        with open(os.path.join(dataPath, input_file)) as csv_file:
+            csv_reader = csv.reader(csv_file, delimiter=',')
+            for line in csv_reader:
+                full_list.append(list(line) + [input_file])
     return dash_table.DataTable(
         id='table',
-        columns=[{"name": i, "id": i} for i in concatted_df.columns],
-        data=concatted_df
+        columns=[
+            #{"name": "ID", "id": "id"}, 
+            {"name": "Date",  "id": "date"},
+            {"name": "From", "id": "from_account",'presentation': 'dropdown'},
+            {"name": "To", "id": "to_account",'presentation': 'dropdown'},
+            {"name": "Amount", "id": "amount"},
+            {"name": "Type", "id": "pay_type",},
+            {"name": "Tags", "id": "tags"},
+            {"name": "Details", "id": "details"},
+            #{"name": "Source", "id": "source"},
+            #{"name": "Raw String", "id": "raw_string"},
+            {"name": "Confidence", "id": "confidence"}
+        ],
+        # INSERT MACHINE LEARNING HERE
+        data=list(map(lambda x: {
+            "include": True,
+            "date":x[6],
+            "amount":x[5],
+            "pay_type":x[0], 
+            "tags":"", 
+            "details":str([x[1] + x[2] + x[3] + x[4]]),
+            "confidence":0,
+            #"source":input_file,
+            #"raw_string": str(x)
+            }, full_list)),
+        
+        # utilities
+        #   power
+        #   rent
+        #   water
+        # essentials
+        #   food
+        #   coffee
+        # fribble
+        #   games
+        #   activities
+        # income
+        #   salary
+        #   invoices
+        # misc
+        #   misc 
+        # 
+        #
+
+        dropdown={
+            'from_account': {
+                'options': [
+                    {'label': "placeholder", 'value': 'placeholder'}
+                ]
+            },
+            'to_account': {
+                'options': [
+                    {'label': "placeholder", 'value': 'placeholder'}
+                ]
+            }
+        },
+        row_selectable='multi',
+        selected_rows=[i for i in range(len(full_list))],
+        editable=True
     )
 
 
