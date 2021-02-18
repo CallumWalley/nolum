@@ -7,7 +7,9 @@
 .account-selector {
   width: 30em;  
 }
-
+.pseudo-dash.table{
+  
+}
 .injest-file-header {
   border-width: 1px;
   border-style: solid;
