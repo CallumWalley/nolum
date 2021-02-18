@@ -24,6 +24,9 @@ external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 
 
+#class DataTable(dash_table.DataTable):
+
+
 def get_bullshit():
     try:
         return [html.Q(children=re.search(r'\n<li>(.*)</li>', urllib.request.urlopen('http://cbsg.sf.net').read().decode('UTF-8')).group(1)), html.P(children=' - Noel Zeng')]
@@ -113,17 +116,14 @@ app.layout = html.Div(children=[
     dash.dependencies.Output('injest-file-selector', 'options'),
     dash.dependencies.Input('injest-file-selector-refresh-button', 'value'))
 def updateFileSelector(unused):
-    allFiles=list(map(lambda x: x["name"], ls(dataPath)))
-    dbFiles=list(map(lambda x: x["name"], db_placeholder))
+    newFiles = filter(lambda x: x['name'] not in map(lambda y: y["name"],db_placeholder), ls(dataPath))
 
-    newFiles = filter(lambda x: x not in dbFiles, allFiles)
-
-    return list(map(lambda x: {'label': x, 'value': x}, newFiles))
+    return list(map(lambda x: {'label': x["name"], 'value': os.path.join(x["path"], x["name"])}, newFiles))
 
 @ app.callback(
     dash.dependencies.Output('injest-file-display', 'options'),
     #dash.dependencies.Output('injest-file-display', 'options'),
-    dash.dependencies.Input('injest-file-selector-refresh-button', 'value'))
+    dash.dependencies.Input('injest-file-display-refresh-button', 'value'))
 def updateFileDisplay(unused):
 
     # fileSelector=dcc.Checklist(
@@ -135,87 +135,116 @@ def updateFileDisplay(unused):
     return list(map(lambda x: {'label': x, 'value': x}, map(lambda x: x["name"], db_placeholder)))
 
 
+
+
 # Called when input file selected, updates tag table
 @ app.callback(
     dash.dependencies.Output('injest-tag-table-wrap', 'children'),
     dash.dependencies.Input('injest-file-selector', 'value'))
 def updateTagTable(input_files):
     
+    # For suggesting entities
+    html.Datalist(
+        id='entity-datalist', 
+        children=[html.Option(value=word) for word in ["entity1", "entity2", "entity3", "entity4"]])
 
-    full_list = []
+    fullList = []
 
     if input_files:
         for input_file in input_files:
-            try:
-                with open(input_file) as csv_file:
-                    csv_reader = csv.reader(csv_file, delimiter=',')
-                    for line in csv_reader:
-                        full_list.append(list(line) + [input_file])
-            except:
-                pass
+            # try:
+            with open(input_file) as csv_file:
+                csv_reader = csv.reader(csv_file, delimiter=',')
+                for line in csv_reader:
+                    fullList.append(list(line) + [input_file])
+            # except:
+            #     print("fuc")
 
-    dataTable = dash_table.DataTable(
-        id='table',
-        columns=[
-            #{"name": "ID", "id": "id"},
-            {"name": "Date",  "id": "date", "type": "datetime"},
-            {"name": "From", "id": "from_account", 'presentation': 'dropdown'},
-            {"name": "To", "id": "to_account", 'presentation': 'dropdown'},
-            {"name": "Amount", "id": "amount", "type": "numeric"},
-            {"name": "Type", "id": "pay_type", },
-            {"name": "Tags", "id": "tags"},
-            {"name": "Details", "id": "details"},
-            #{"name": "Source", "id": "source"},
-            #{"name": "Raw String", "id": "raw_string"},
-            {"name": "Confidence", "id": "confidence"}
-        ],
-        # INSERT MACHINE LEARNING HERE
-        data=list(map(lambda x: {
-            "include": True,
-            "date": x[6],
-            "amount": x[5],
-            "pay_type": x[0],
-            "tags": "",
-            "details": str([x[1] + x[2] + x[3] + x[4]]),
-            "confidence": 0,
-            # "source":input_file,
-            # "raw_string": str(x)
-        }, full_list)),
+    def genRow(input):
+        def plainTextFixed(value):
+            return html.Td(value)
+        def textEntity(value):
+            return html.Td(value)
+            
+        return html.Tr(children=[
+            plainTextFixed(input[0]),
+            plainTextFixed(input[1]),
+            plainTextFixed(input[2]),
+            plainTextFixed(input[3]),
+            plainTextFixed(input[4]),
+            plainTextFixed(input[5]),
+            plainTextFixed(input[6]),
+            plainTextFixed(input[7]),
+            plainTextFixed(input[8]),
+            plainTextFixed(input[9])
+        ])
 
-        # utilities
-        #   power
-        #   rent
-        #   water
-        # essentials
-        #   food
-        #   coffee
-        # fribble
-        #   games
-        #   activities
-        # income
-        #   salary
-        #   invoices
-        # misc
-        #   misc
-        #
-        #
+    columns = ["Date", "From", "To", "Amount", "Type", "Tags", "Details", "Source", "RawString", "Confidence"]
+    #dash_table.DataTable(
+    dataTable=html.Table(id="injest-tag-table",style={"width":"100%"}, children=[
+        html.Tr(style={"width":"100%"}, className="injest-file-header", children=list(map(lambda x: html.Th(x), columns))),
+        *list(map(genRow,fullList))
+    ])
+    #     columns=[
+    #         #{"name": "ID", "id": "id"},
+    #         {"name": "Date",  "id": "date", "type": "datetime"},
+    #         {"name": "From", "id": "from_account", 'presentation': 'input'},
+    #         {"name": "To", "id": "to_account", 'presentation': 'input'},
+    #         {"name": "Amount", "id": "amount", "type": "numeric"},
+    #         {"name": "Type", "id": "pay_type", },
+    #         {"name": "Tags", "id": "tags"},
+    #         {"name": "Details", "id": "details"},
+    #         #{"name": "Source", "id": "source"},
+    #         #{"name": "Raw String", "id": "raw_string"},
+    #         {"name": "Confidence", "id": "confidence"}
+    #     ],
+    #     # INSERT MACHINE LEARNING HERE
+    #     data=list(map(lambda x: {
+    #         "include": True,
+    #         "date": x[6],
+    #         "amount": x[5],
+    #         "pay_type": x[0],
+    #         "tags": "",
+    #         "details": str([x[1] + x[2] + x[3] + x[4]]),
+    #         "confidence": 0,
+    #         # "source":input_file,
+    #         # "raw_string": str(x)
+    #     }, full_list)),
 
-        dropdown={
-            'from_account': {
-                'options': [
-                    {'label': "placeholder", 'value': 'placeholder'}
-                ]
-            },
-            'to_account': {
-                'options': [
-                    {'label': "placeholder", 'value': 'placeholder'}
-                ]
-            }
-        },
-        row_selectable='multi',
-        selected_rows=[i for i in range(len(full_list))],
-        editable=True
-    )
+    #     # utilities
+    #     #   power
+    #     #   rent
+    #     #   water
+    #     # essentials
+    #     #   food
+    #     #   coffee
+    #     # fribble
+    #     #   games
+    #     #   activities
+    #     # income
+    #     #   salary
+    #     #   invoices
+    #     # misc
+    #     #   misc
+    #     #
+    #     #
+
+    #     # dropdown={
+    #     #     'from_account': {
+    #     #         'options': [
+    #     #             {'label': "placeholder", 'value': 'placeholder'}
+    #     #         ]
+    #     #     },
+    #     #     'to_account': {
+    #     #         'options': [
+    #     #             {'label': "placeholder", 'value': 'placeholder'}
+    #     #         ]
+    #     #     }
+    #     # },
+    #     row_selectable='multi',
+    #     selected_rows=[i for i in range(len(full_list))],
+    #     editable=True
+    # )
 
     return dataTable
 
