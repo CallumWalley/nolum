@@ -7,3 +7,28 @@
 .account-selector {
   width: 30em;  
 }
+
+.injest-file-header {
+  border-width: 1px;
+  border-style: solid;
+  border-color: rgb(211, 211, 211);
+  display: flex;
+  background-color: #fafafa;
+  color: rgb(50, 50, 50);
+  font-family: monospace;
+  font-size: 12.1875px;
+  font-weight: 400;
+  box-sizing: border-box;
+}
+
+.refresh-button {
+  margin-left: auto;
+}
+
+#file-select-tables {
+  display: flex;
+}
+
+.file-select-table {
+  flex-grow: 1;
+}

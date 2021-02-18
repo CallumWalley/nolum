@@ -10,12 +10,16 @@ import os
 import re
 import csv
 import urllib.request
+import hashlib
 
 from dash.dependencies import Input, Output
 
+from OSMPythonTools.nominatim import Nominatim
+
 # Where to look for data.
 dataPath = "data"
-
+db_placeholder = [
+        {"name": "06-0169-0179253-04_Transactions_2019-02-16_2019-12-31.csv", "hd5sum": "fake", "path":"data"}]
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 
@@ -25,6 +29,25 @@ def get_bullshit():
         return [html.Q(children=re.search(r'\n<li>(.*)</li>', urllib.request.urlopen('http://cbsg.sf.net').read().decode('UTF-8')).group(1)), html.P(children=' - Noel Zeng')]
     except:
         return ":("
+
+
+def ls(dataPath):
+    outlist = []
+    for file in os.listdir(dataPath):
+        newpath = os.path.join(dataPath, file)
+        if os.path.isdir(newpath):
+            for f in ls(newpath):
+                outlist.append(f)
+        elif newpath[-4:].lower() == ".csv":
+            hd5sum = hashlib.md5(open(newpath).read().encode('utf-8')).hexdigest()
+            # if file in map(lambda x: x["name"], db_placeholder)
+            # If in database, but hex different, add to csv_files_digested_changed.
+            # If in database, don't add.
+            splitpath=list(os.path.split(newpath))
+            name=splitpath.pop()
+            path="/".join(splitpath)
+            outlist.append({"name":name, "path":path, "hd5sum":hd5sum})
+    return outlist
 
 
 app.layout = html.Div(children=[
@@ -39,21 +62,37 @@ app.layout = html.Div(children=[
                 dcc.Dropdown(
                     id='ingest-select-account',
                     className='account-selector',
-                    options=[{'label': 'placeholder', 'value': 'placeholder'}]
+                    options=[{'label': 'placeholder', 'value': 'placeholder'}],
+                    placeholder="Select account"
                     # options=list(
                     #     map(lambda x: {'label': x, 'value': x}, os.listdir(dataPath))),
                 )
             ]),
-            html.Div(className='radio-scroll', children=[
-                dcc.Checklist(
-                    id='ingest-list',
-                    options=list(
-                        map(lambda x: {'label': x, 'value': x}, os.listdir(dataPath))),
-                    value=[]  # List of imported documents.
-                )
+            html.Div(id="file-select-tables", children=[
+                html.Div(className="file-select-table", children=[
+                    html.Div(className="injest-file-header", children=[
+                        html.P("Undigested input files"),
+                        html.Button(
+                            '⟳', id='injest-file-selector-refresh-button', className="refresh-button")
+                    ]),
+                    html.Div(className='radio-scroll', id='injest-file-selector-wrap',
+                             children=[dcc.Checklist(
+                                 id='injest-file-selector'
+                             )]),
+                ]),
+                html.Div(className="file-select-table", children=[
+                    html.Div(className="injest-file-header", children=[
+                        html.P("Digested input files"),
+                        html.Button(
+                            '⟳', id='injest-file-display-refresh-button', className="refresh-button")
+                    ]),
+                    html.Div(className='radio-scroll', id='injest-file-display-wrap',
+                             children=[dcc.Checklist(
+                                 id='injest-file-display'
+                             )]),
+                ]),
             ]),
-            html.Button('Load', id='load-button', n_clicks=0),
-            html.Div(id='ingest-tag-table'),
+            html.Div(id='injest-tag-table-wrap'),
             html.Button('Ingest', id='ingest-button', n_clicks=0),
             html.Div(id='ingested-data')
 
@@ -71,26 +110,59 @@ app.layout = html.Div(children=[
 
 
 @ app.callback(
-    dash.dependencies.Output('ingest-tag-table', 'children'),
-    dash.dependencies.Input('load-button', 'n_clicks'),
-    dash.dependencies.State('ingest-list', 'value'))
+    dash.dependencies.Output('injest-file-selector', 'options'),
+    dash.dependencies.Input('injest-file-selector-refresh-button', 'value'))
+def updateFileSelector(unused):
+    allFiles=list(map(lambda x: x["name"], ls(dataPath)))
+    dbFiles=list(map(lambda x: x["name"], db_placeholder))
 
-def update_output(clicks, input_files):
+    newFiles = filter(lambda x: x not in dbFiles, allFiles)
+
+    return list(map(lambda x: {'label': x, 'value': x}, newFiles))
+
+@ app.callback(
+    dash.dependencies.Output('injest-file-display', 'options'),
+    #dash.dependencies.Output('injest-file-display', 'options'),
+    dash.dependencies.Input('injest-file-selector-refresh-button', 'value'))
+def updateFileDisplay(unused):
+
+    # fileSelector=dcc.Checklist(
+    #     id='file-selector',
+    #     className='account-selector',
+    #     options=list(map(lambda x: {'label': x, 'value': x}, csv_files_undigested))
+    # )
+
+    return list(map(lambda x: {'label': x, 'value': x}, map(lambda x: x["name"], db_placeholder)))
+
+
+# Called when input file selected, updates tag table
+@ app.callback(
+    dash.dependencies.Output('injest-tag-table-wrap', 'children'),
+    dash.dependencies.Input('injest-file-selector', 'value'))
+def updateTagTable(input_files):
+    
+
     full_list = []
-    for input_file in input_files:
-        with open(os.path.join(dataPath, input_file)) as csv_file:
-            csv_reader = csv.reader(csv_file, delimiter=',')
-            for line in csv_reader:
-                full_list.append(list(line) + [input_file])
-    return dash_table.DataTable(
+
+    if input_files:
+        for input_file in input_files:
+            try:
+                with open(input_file) as csv_file:
+                    csv_reader = csv.reader(csv_file, delimiter=',')
+                    for line in csv_reader:
+                        full_list.append(list(line) + [input_file])
+            except:
+                pass
+
+    dataTable = dash_table.DataTable(
         id='table',
         columns=[
-            #{"name": "ID", "id": "id"}, 
-            {"name": "Date",  "id": "date"},
-            {"name": "From", "id": "from_account",'presentation': 'dropdown'},
-            {"name": "To", "id": "to_account",'presentation': 'dropdown'},
-            {"name": "Amount", "id": "amount"},
-            {"name": "Type", "id": "pay_type",},
+            #{"name": "ID", "id": "id"},
+            {"name": "Date",  "id": "date", "type": "datetime"},
+            {"name": "From", "id": "from_account", 'presentation': 'dropdown'},
+            {"name": "To", "id": "to_account", 'presentation': 'dropdown'},
+            {"name": "Amount", "id": "amount", "type": "numeric"},
+            {"name": "Type", "id": "pay_type", },
             {"name": "Tags", "id": "tags"},
             {"name": "Details", "id": "details"},
             #{"name": "Source", "id": "source"},
@@ -100,16 +172,16 @@ def update_output(clicks, input_files):
         # INSERT MACHINE LEARNING HERE
         data=list(map(lambda x: {
             "include": True,
-            "date":x[6],
-            "amount":x[5],
-            "pay_type":x[0], 
-            "tags":"", 
-            "details":str([x[1] + x[2] + x[3] + x[4]]),
-            "confidence":0,
-            #"source":input_file,
-            #"raw_string": str(x)
-            }, full_list)),
-        
+            "date": x[6],
+            "amount": x[5],
+            "pay_type": x[0],
+            "tags": "",
+            "details": str([x[1] + x[2] + x[3] + x[4]]),
+            "confidence": 0,
+            # "source":input_file,
+            # "raw_string": str(x)
+        }, full_list)),
+
         # utilities
         #   power
         #   rent
@@ -124,8 +196,8 @@ def update_output(clicks, input_files):
         #   salary
         #   invoices
         # misc
-        #   misc 
-        # 
+        #   misc
+        #
         #
 
         dropdown={
@@ -144,6 +216,10 @@ def update_output(clicks, input_files):
         selected_rows=[i for i in range(len(full_list))],
         editable=True
     )
+
+    return dataTable
+
+# Tabs
 
 
 @app.callback(Output('metrics-tab-content', 'children'),
