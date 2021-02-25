@@ -118,7 +118,8 @@ app.layout = html.Div(children=[
     dash.dependencies.State('injest-file-selector', "value"),
     dash.dependencies.State('injest-tag-table-wrap', "children"))
 def injestDoc(nothing, inputSource, everythin):
-    print(inputSource)
+    
+    print(filter(lambda x: x["name"]=inputSource, foundInputFiles))
 
 @ app.callback(
     dash.dependencies.Output('injest-file-selector', 'options'),
