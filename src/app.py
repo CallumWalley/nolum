@@ -119,7 +119,7 @@ app.layout = html.Div(children=[
     dash.dependencies.State('injest-tag-table-wrap', "children"))
 def injestDoc(nothing, inputSource, everythin):
     
-    print(filter(lambda x: x["name"]=inputSource, foundInputFiles))
+    print(filter(lambda x: x["name"]==inputSource, foundInputFiles))
 
 @ app.callback(
     dash.dependencies.Output('injest-file-selector', 'options'),
@@ -128,7 +128,7 @@ def updateFileSelector(unused):
     foundInputFiles=ls(dataPath)
     newFiles = filter(lambda x: x['name'] not in map(lambda y: y["name"],db_placeholder), foundInputFiles)
 
-    return list(map(lambda x: {'label': x["name"], 'value': os.path.join(x["path"], x["name"])}, newFiles))
+    return list(map(lambda x: {'value': x["name"], 'label': os.path.join(x["path"], x["name"])}, newFiles))
 
 @ app.callback(
     dash.dependencies.Output('injest-file-display', 'options'),
@@ -178,8 +178,14 @@ def updateTagTable(input_files):
                     value=value
                 )
             )
+        def strikeoutButton():
+            return html.Td(
+                    html.Button('x', className="strikeout-button")
+                )
+        
 
         return html.Tr(children=[
+            strikeoutButton(),
             plainTextFixed(input[0]),
             plainTextEntity(input[1]),
             plainTextEntity(input[2]),
