@@ -60,6 +60,8 @@ class Entity(Base):
 # class Misc(Invoiceable):
 
 
+
+
 # class Invoice(Base):
 #     """Two entities and a list of hours"""
 #     __tablename__:"invoice"

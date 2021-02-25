@@ -11,6 +11,7 @@ import re
 import csv
 import urllib.request
 import hashlib
+import model as mdl
 
 from dash.dependencies import Input, Output
 
@@ -19,13 +20,14 @@ from OSMPythonTools.nominatim import Nominatim
 # Where to look for data.
 dataPath = "data"
 db_placeholder = [
-        {"name": "06-0169-0179253-04_Transactions_2019-02-16_2019-12-31.csv", "hd5sum": "fake", "path":"data"}]
+        {"name": "06-0169-0179253-04_Transactions_2019-02-16_2019-12-31.csv", "md5sum": "fake", "path":"data"}]
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 
 
-#class DataTable(dash_table.DataTable):
 
+#class DataTable(dash_table.DataTable):
+foundInputFiles={}
 
 def get_bullshit():
     try:
@@ -110,13 +112,20 @@ app.layout = html.Div(children=[
         html.Div(id='metrics-tab-content')
     ])
 ])
-
+@ app.callback(
+    dash.dependencies.Output('ingested-data', 'children'),
+    dash.dependencies.Input('ingest-button', 'n_clicks'),
+    dash.dependencies.State('injest-file-selector', "value"),
+    dash.dependencies.State('injest-tag-table-wrap', "children"))
+def injestDoc(nothing, inputSource, everythin):
+    print(inputSource)
 
 @ app.callback(
     dash.dependencies.Output('injest-file-selector', 'options'),
     dash.dependencies.Input('injest-file-selector-refresh-button', 'value'))
 def updateFileSelector(unused):
-    newFiles = filter(lambda x: x['name'] not in map(lambda y: y["name"],db_placeholder), ls(dataPath))
+    foundInputFiles=ls(dataPath)
+    newFiles = filter(lambda x: x['name'] not in map(lambda y: y["name"],db_placeholder), foundInputFiles)
 
     return list(map(lambda x: {'label': x["name"], 'value': os.path.join(x["path"], x["name"])}, newFiles))
 
@@ -136,18 +145,15 @@ def updateFileDisplay(unused):
 
 
 
-
+# For suggesting entities
+html.Datalist(
+    id='entity-datalist', 
+    children=[html.Option(value=word) for word in ["entity1", "entity2", "entity3", "entity4"]])
 # Called when input file selected, updates tag table
 @ app.callback(
     dash.dependencies.Output('injest-tag-table-wrap', 'children'),
     dash.dependencies.Input('injest-file-selector', 'value'))
 def updateTagTable(input_files):
-    
-    # For suggesting entities
-    html.Datalist(
-        id='entity-datalist', 
-        children=[html.Option(value=word) for word in ["entity1", "entity2", "entity3", "entity4"]])
-
     fullList = []
 
     if input_files:
@@ -163,13 +169,19 @@ def updateTagTable(input_files):
     def genRow(input):
         def plainTextFixed(value):
             return html.Td(value)
-        def textEntity(value):
-            return html.Td(value)
-            
+        def plainTextEntity(value):            
+            return html.Td(
+                dcc.Input(
+                    type='text',
+                    list='entity-datalist',
+                    value=value
+                )
+            )
+
         return html.Tr(children=[
             plainTextFixed(input[0]),
-            plainTextFixed(input[1]),
-            plainTextFixed(input[2]),
+            plainTextEntity(input[1]),
+            plainTextEntity(input[2]),
             plainTextFixed(input[3]),
             plainTextFixed(input[4]),
             plainTextFixed(input[5]),
