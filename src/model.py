@@ -1,14 +1,14 @@
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, Integer, String, ForeignKey, Numeric, Boolean, JSON, Date, create_engine
 
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, sessionmaker
 
 Base = declarative_base()
 # ANZ details example
 # Type,             Details,                        Particulars,    Code,               Reference,  Amount, Date,       ForeignCurrencyAmount,      ConversionCharge
 # Visa Purchase,    4835-****-****-2031  Df,        0.64,           Google  Clou,       0.21,       -12.07, 04/12/2019, USD 7.61 converted at 0.64, This includes a currency conversion charge of $0.21
 
-class Transaction(Base):
+class BankTransaction(Base):
     __tablename__ = "transaction"
 
     id = Column(Integer, primary_key=True)
@@ -70,10 +70,7 @@ class Entity(Base):
 #     entity_paying = 
 #     entity_receiving =
 
-
-engine = create_engine("sqlite:///data.db")
-Base.metadata.create_all(engine)
-
-from sqlalchemy.orm import sessionmaker
-Session = sessionmaker(engine)
-session = Session()
+def create_session_maker():
+    engine = create_engine("sqlite:///data.db")
+    Base.metadata.create_all(engine)
+    return sessionmaker(engine)
