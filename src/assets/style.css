@@ -7,20 +7,21 @@
 .account-selector {
   width: 30em;  
 }
-.pseudo-dash.table{
-  
-}
-.injest-file-header {
+.pseudo-dash{
   border-width: 1px;
   border-style: solid;
   border-color: rgb(211, 211, 211);
-  display: flex;
   background-color: #fafafa;
   color: rgb(50, 50, 50);
   font-family: monospace;
   font-size: 12.1875px;
   font-weight: 400;
   box-sizing: border-box;
+}
+.injest-file-header {
+
+  display: flex;
+
 }
 
 .refresh-button {

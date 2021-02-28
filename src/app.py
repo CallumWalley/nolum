@@ -72,7 +72,7 @@ app.layout = html.Div(children=[
             ]),
             html.Div(id="file-select-tables", children=[
                 html.Div(className="file-select-table", children=[
-                    html.Div(className="injest-file-header", children=[
+                    html.Div(className="injest-file-header pseudo-dash", children=[
                         html.P("Undigested input files"),
                         html.Button(
                             '⟳', id='injest-file-selector-refresh-button', className="refresh-button")
@@ -83,7 +83,7 @@ app.layout = html.Div(children=[
                              )]),
                 ]),
                 html.Div(className="file-select-table", children=[
-                    html.Div(className="injest-file-header", children=[
+                    html.Div(className="injest-file-header pseudo-dash", children=[
                         html.P("Digested input files"),
                         html.Button(
                             '⟳', id='injest-file-display-refresh-button', className="refresh-button")
@@ -115,8 +115,7 @@ app.layout = html.Div(children=[
     dash.dependencies.State('injest-file-selector', "value"),
     dash.dependencies.State('injest-tag-table-wrap', "children"))
 def injestDoc(nothing, inputSource, everythin):
-    print(foundInputFiles)
-    print(inputSource)
+
     print(list(filter(lambda x: x["name"]==inputSource, foundInputFiles)))
 
 @ app.callback(
@@ -124,7 +123,6 @@ def injestDoc(nothing, inputSource, everythin):
     dash.dependencies.Input('injest-file-selector-refresh-button', 'value'))
 def updateFileSelector(unused):
     foundInputFiles=ls(dataPath)
-    print(foundInputFiles)
     newFiles = filter(lambda x: x['name'] not in map(lambda y: y["name"],db_placeholder), foundInputFiles)
 
     return list(map(lambda x: {'label': x["name"], 'value': x["name"]}, newFiles))
@@ -199,8 +197,9 @@ def updateTagTable(input_files):
     columns = ["Date", "From", "To", "Amount", "Type", "Tags", "Details", "Source", "RawString", "Confidence"]
     #dash_table.DataTable(
     dataTable=html.Table(id="injest-tag-table",style={"width":"100%"}, children=[
-        html.Tr(style={"width":"100%"}, className="injest-file-header", children=list(map(lambda x: html.Th(x), columns))),
-        *list(map(genRow,fullList))
+        html.Thead(style={"width":"100%"}, className="pseudo-dash", children=list(map(lambda x: html.Th(x), columns))),
+        html.Tbody(*list(map(genRow,fullList)))
+        
     ])
     #     columns=[
     #         #{"name": "ID", "id": "id"},
