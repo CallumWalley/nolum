@@ -48,10 +48,7 @@ def ls(dataPath):
             # if file in map(lambda x: x["name"], db_placeholder)
             # If in database, but hex different, add to csv_files_digested_changed.
             # If in database, don't add.
-            splitpath=list(os.path.split(newpath))
-            name=splitpath.pop()
-            path="/".join(splitpath)
-            outlist.append({"name":name, "path":path, "hd5sum":hd5sum})
+            outlist.append({"name":newpath, "hd5sum":hd5sum})
     return outlist
 
 
@@ -118,17 +115,19 @@ app.layout = html.Div(children=[
     dash.dependencies.State('injest-file-selector', "value"),
     dash.dependencies.State('injest-tag-table-wrap', "children"))
 def injestDoc(nothing, inputSource, everythin):
-    
-    print(filter(lambda x: x["name"]==inputSource, foundInputFiles))
+    print(foundInputFiles)
+    print(inputSource)
+    print(list(filter(lambda x: x["name"]==inputSource, foundInputFiles)))
 
 @ app.callback(
     dash.dependencies.Output('injest-file-selector', 'options'),
     dash.dependencies.Input('injest-file-selector-refresh-button', 'value'))
 def updateFileSelector(unused):
     foundInputFiles=ls(dataPath)
+    print(foundInputFiles)
     newFiles = filter(lambda x: x['name'] not in map(lambda y: y["name"],db_placeholder), foundInputFiles)
 
-    return list(map(lambda x: {'label': x["name"], 'value': os.path.join(x["path"], x["name"])}, newFiles))
+    return list(map(lambda x: {'label': x["name"], 'value': x["name"]}, newFiles))
 
 @ app.callback(
     dash.dependencies.Output('injest-file-display', 'options'),
