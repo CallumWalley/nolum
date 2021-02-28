@@ -128,7 +128,7 @@ def updateFileSelector(unused):
     foundInputFiles=ls(dataPath)
     newFiles = filter(lambda x: x['name'] not in map(lambda y: y["name"],db_placeholder), foundInputFiles)
 
-    return list(map(lambda x: {'value': x["name"], 'label': os.path.join(x["path"], x["name"])}, newFiles))
+    return list(map(lambda x: {'label': x["name"], 'value': os.path.join(x["path"], x["name"])}, newFiles))
 
 @ app.callback(
     dash.dependencies.Output('injest-file-display', 'options'),
@@ -156,7 +156,6 @@ html.Datalist(
     dash.dependencies.Input('injest-file-selector', 'value'))
 def updateTagTable(input_files):
     fullList = []
-
     if input_files:
         for input_file in input_files:
             # try:
@@ -268,8 +267,6 @@ def updateTagTable(input_files):
     return dataTable
 
 # Tabs
-
-
 @app.callback(Output('metrics-tab-content', 'children'),
               Input('metrics-tab', 'value'))
 def render_content(tab):
