@@ -37,7 +37,7 @@ class InputSource(Base):
     path = Column(String)
     filename = Column(String)
     ingest_date = Column(Date)
-    sha1_sum = Column(Integer) 
+    hd5sum = Column(Integer) 
 
 class Account(Base):
     """List of Transactions"""
