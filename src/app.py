@@ -12,6 +12,7 @@ import csv
 import urllib.request
 import hashlib
 import model as mdl
+from datetime import date
 
 from dash.dependencies import Input, Output
 
@@ -24,6 +25,8 @@ db_placeholder = [
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 
+# Set up connection with database
+DbSession = mdl.create_session_maker()
 
 
 #class DataTable(dash_table.DataTable):
@@ -51,6 +54,13 @@ def ls(dataPath):
             outlist.append({"name":newpath, "hd5sum":hd5sum})
     return outlist
 
+def find_input_files_by_name():
+    # Builds and returns metadata for files in the data path.
+    files = ls(dataPath)
+    files_by_name = {}
+    for file in files:
+        files_by_name[file["name"]] = file
+    return files_by_name
 
 app.layout = html.Div(children=[
     html.H1(children='NoLum Cloud-Native Deep-Learning Hyper-Ledger'),
@@ -109,15 +119,34 @@ app.layout = html.Div(children=[
         html.Div(id='metrics-tab-content')
     ])
 ])
+
+
 @ app.callback(
     dash.dependencies.Output('ingested-data', 'children'),
     dash.dependencies.Input('ingest-button', 'n_clicks'),
     dash.dependencies.State('injest-file-selector', "value"),
     dash.dependencies.State('injest-tag-table-wrap', "children"))
 def injestDoc(nothing, inputSource, everythin):
-    print(foundInputFiles)
-    print(inputSource)
-    print(list(filter(lambda x: x["name"]==inputSource, foundInputFiles)))
+    input_files_by_name = find_input_files_by_name()
+    # print("My input source is " + str(inputSource))
+    # print(list(filter(lambda x: x["name"]==inputSource, foundInputFiles)))
+    if inputSource is None:
+        return
+    session = DbSession()
+    for source in inputSource:
+        matched_file = input_files_by_name[source]
+        filename = os.path.basename(source)
+        ingestion_date = date.today()
+        hd5sum = matched_file["hd5sum"]
+        if len(session.query(mdl.InputSource).filter(mdl.InputSource.path == source).all()) > 0:
+            # Skip ingest if already imported
+            print(f"Skipping import for {filename} as already in database.")
+            continue
+        session.add(mdl.InputSource(path=source, filename=filename, hd5sum=hd5sum, ingest_date=ingestion_date))
+    # Save all to the session
+    print(f"Committing {len(session.new)} object(s) into database.")
+    session.commit()
+    session.close()
 
 @ app.callback(
     dash.dependencies.Output('injest-file-selector', 'options'),
@@ -129,7 +158,7 @@ def updateFileSelector(unused):
 
     return list(map(lambda x: {'label': x["name"], 'value': x["name"]}, newFiles))
 
-@ app.callback(
+@ app.callback( 
     dash.dependencies.Output('injest-file-display', 'options'),
     #dash.dependencies.Output('injest-file-display', 'options'),
     dash.dependencies.Input('injest-file-display-refresh-button', 'value'))
