@@ -31,6 +31,9 @@ function InputFileList(){
   return
 }
 
+function InjestedFileList(){
+  return
+}
 
 function App() {
   return (
@@ -54,7 +57,7 @@ function App() {
               <div className="injest-file-header pseudo-dash">
                 <p>Digested input files</p>
                 <button className='refresh-button'>⟳</button></div>
-              <div className='radio-scroll'></div>
+              <div className='radio-scroll'><InjestedFileList/></div>
             </div>
           </div>
       </div>
