@@ -2,6 +2,7 @@
 
 import dash
 import dash_table
+import dash_tabulator
 import dash_core_components as dcc
 import dash_html_components as html
 import plotly.express as px
@@ -172,7 +173,6 @@ def updateFileDisplay(unused):
     return list(map(lambda x: {'label': x, 'value': x}, map(lambda x: x["name"], db_placeholder)))
 
 
-
 # For suggesting entities
 html.Datalist(
     id='entity-datalist', 
@@ -192,70 +192,97 @@ def updateTagTable(input_files):
                     fullList.append(list(line) + [input_file])
             # except:
             #     print("fuc")
+    # columns = [
+    #             { "title": "Name", "field": "name", "width": 150, "headerFilter":True, "editor":"input"},
+    #             { "title": "Age", "field": "age", "hozAlign": "left", "formatter": "progress" },
+    #             { "title": "Favourite Color", "field": "col", "headerFilter":True },
+    #             { "title": "Date Of Birth", "field": "dob", "hozAlign": "center" },
+    #             { "title": "Rating", "field": "rating", "hozAlign": "center", "formatter": "star" },
+    #             { "title": "Passed?", "field": "passed", "hozAlign": "center", "formatter": "tickCross" }
+    #           ]
+    columns=[
+        #{"name": "ID", "id": "id"},
+        {"title": "", "field":"include"},
+        {"title": "Date", "field":"date"},
+        {"title": "From","field":"from"},
+        {"title": "To", "field":"to"},
+        {"title": "Amount","field":"amount"},
+        {"title": "Type","field":"pay_type"},
+        {"title": "Tags", "field":"tags"},
+        {"title": "Details", "field":"details"},
+        #{"name": "Source", "id": "source"},
+        #{"name": "Raw String", "id": "raw_string"},
+        {"title": "Confidence", "field":"confidence"}
+    ]
+    data=list(map(lambda x: {
+            "include": True,
+            "date": x[6],
+            "amount": x[5],
+            "pay_type": x[0],
+            "tags": "",
+            "details": str([x[1] + x[2] + x[3] + x[4]]),
+            "confidence": 0,
+            # "source":input_file,
+            # "raw_string": str(x)
+        }, fullList))
+    # Setup some data
+    # data = [
+    #                 {"id":1, "name":"Oli Bob", "age":"12", "col":"red", "dob":""},
+    #                 {"id":2, "name":"Mary May", "age":"1", "col":"blue", "dob":"14/05/1982"},
+    #                 {"id":3, "name":"Christine Lobowski", "age":"42", "col":"green", "dob":"22/05/1982"},
+    #                 {"id":4, "name":"Brendon Philips", "age":"125", "col":"orange", "dob":"01/08/1980"},
+    #                 {"id":5, "name":"Margret Marmajuke", "age":"16", "col":"yellow", "dob":"31/01/1999"},
+    #                 {"id":6, "name":"Fred Savage", "age":"16", "col":"yellow", "rating":"1", "dob":"31/01/1999"},
+    #                 {"id":6, "name":"Brie Larson", "age":"30", "col":"blue", "rating":"1", "dob":"31/01/1999"},
+    #             ]
 
-    def genRow(input):
-        def plainTextFixed(value):
-            return html.Td(value)
-        def plainTextEntity(value):            
-            return html.Td(
-                dcc.Input(
-                    type='text',
-                    list='entity-datalist',
-                    value=value
-                )
-            )
-        def strikeoutButton():
-            return html.Td(
-                    html.Button('x', className="strikeout-button")
-                )
+    dataTable=dash_tabulator.DashTabulator(
+        id='injest-tag-table',
+        columns=columns,
+        data=data
+        # options=options,
+    )
+    # def genRow(index, input):
+    #     def plainTextFixed(value):
+    #         return html.Td(value)
+    #     def plainTextEntity(value):            
+    #         return html.Td(
+    #             dcc.Input(
+    #                 type='text',
+    #                 list='entity-datalist',
+    #                 value=value 
+    #             )
+    #         )
+    #     def strikeoutButton():
+    #         return html.Td(
+    #                 html.Button('x',id=f"strikeout-button-{index}", className="strikeout-button")
+    #             )
         
+    #     return html.Tr(children=[
+    #         strikeoutButton(),
+    #         plainTextFixed(input[0]),
+    #         plainTextEntity(input[1]),
+    #         plainTextEntity(input[2]),
+    #         plainTextFixed(input[3]),
+    #         plainTextFixed(input[4]),
+    #         plainTextFixed(input[5]),
+    #         plainTextFixed(input[6]),
+    #         plainTextFixed(input[7]),
+    #         plainTextFixed(input[8]),
+    #         plainTextFixed(input[9])
+    #     ])
 
-        return html.Tr(children=[
-            strikeoutButton(),
-            plainTextFixed(input[0]),
-            plainTextEntity(input[1]),
-            plainTextEntity(input[2]),
-            plainTextFixed(input[3]),
-            plainTextFixed(input[4]),
-            plainTextFixed(input[5]),
-            plainTextFixed(input[6]),
-            plainTextFixed(input[7]),
-            plainTextFixed(input[8]),
-            plainTextFixed(input[9])
-        ])
-
-    columns = ["Date", "From", "To", "Amount", "Type", "Tags", "Details", "Source", "RawString", "Confidence"]
-    #dash_table.DataTable(
-    dataTable=html.Table(id="injest-tag-table",style={"width":"100%"}, children=[
-        html.Thead(style={"width":"100%"}, className="pseudo-dash", children=list(map(lambda x: html.Th(x), columns))),
-        html.Tbody(*list(map(genRow,fullList)))
+    # columns = ["Date", "From", "To", "Amount", "Type", "Tags", "Details", "Source", "RawString", "Confidence"]
+    # #dash_table.DataTable(
+    # dataTable=html.Table(id="injest-tag-table",style={"width":"100%"}, children=[
+    #     html.Thead(style={"width":"100%"}, className="pseudo-dash", children=list(map(lambda x: html.Th(x), columns))),
+    #     html.Tbody(children=[*list(genRow(i,l) for i,l in enumerate(fullList))])
+    #     # html.Tbody(*list(map(genRow,fullList)))
         
-    ])
-    #     columns=[
-    #         #{"name": "ID", "id": "id"},
-    #         {"name": "Date",  "id": "date", "type": "datetime"},
-    #         {"name": "From", "id": "from_account", 'presentation': 'input'},
-    #         {"name": "To", "id": "to_account", 'presentation': 'input'},
-    #         {"name": "Amount", "id": "amount", "type": "numeric"},
-    #         {"name": "Type", "id": "pay_type", },
-    #         {"name": "Tags", "id": "tags"},
-    #         {"name": "Details", "id": "details"},
-    #         #{"name": "Source", "id": "source"},
-    #         #{"name": "Raw String", "id": "raw_string"},
-    #         {"name": "Confidence", "id": "confidence"}
-    #     ],
+    # ])
+
     #     # INSERT MACHINE LEARNING HERE
-    #     data=list(map(lambda x: {
-    #         "include": True,
-    #         "date": x[6],
-    #         "amount": x[5],
-    #         "pay_type": x[0],
-    #         "tags": "",
-    #         "details": str([x[1] + x[2] + x[3] + x[4]]),
-    #         "confidence": 0,
-    #         # "source":input_file,
-    #         # "raw_string": str(x)
-    #     }, full_list)),
+    #     
 
     #     # utilities
     #     #   power
@@ -294,7 +321,10 @@ def updateTagTable(input_files):
 
     return dataTable
 
+
+
 # Tabs
+
 @app.callback(Output('metrics-tab-content', 'children'),
               Input('metrics-tab', 'value'))
 def render_content(tab):

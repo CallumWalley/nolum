@@ -2,3 +2,5 @@ sqlalchemy
 dash
 pandas
 OSMPythonTools
+dash_tabulator
+dash_extensions
