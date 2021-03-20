@@ -1,5 +1,6 @@
 import './App.css';
 import { useEffect, useState } from "react";
+import TransactionEditorTable from "./TransactionEditorTable";
 
 function CallumQuoteBox() {
   const [quote, setQuote] = useState();
@@ -30,11 +31,13 @@ function CallumQuoteBox() {
 
 
 function App() {
+
   return (
     <div className="App">
       <h1>NoLum Cloud-Native Deep-Learning Hyper-Ledger, v2</h1>
       <CallumQuoteBox />
       <h2>Ingest new data</h2>
+      <TransactionEditorTable />
 
     </div>
   );
