@@ -1,3 +1,67 @@
 .App {
   text-align: center;
 }
+.radio-scroll {
+
+  overflow-y: scroll;
+  max-height: 10em;
+
+}
+.account-selector {
+  width: 30em;  
+}
+.pseudo-dash{
+  border-width: 1px;
+  border-style: solid;
+  border-color: rgb(211, 211, 211);
+  background-color: #fafafa;
+  color: rgb(50, 50, 50);
+  font-family: monospace;
+  font-size: 12.1875px;
+  font-weight: 400;
+  box-sizing: border-box;
+}
+.injest-file-header {
+  display: flex;
+}
+
+.refresh-button {
+  margin-left: auto;
+}
+
+.file-select-table {
+  flex-grow: 1;
+}
+#file-select-tables {
+  display: flex;
+}
+.department {
+  border: grey;
+  border-radius: 1em;
+  border-style: solid;
+  margin: 1em 1em 2em 1em;
+  padding: 1em;
+  border-width: 1px;
+}
+.team {
+  border: grey;
+  border-radius: 1em;
+  border-style: solid;
+  border-width: 1px;
+  padding: 1em;
+  margin: 1em 0 0 0;
+}
+.department>h2 {
+  float: left;
+  margin: 0;
+  background: white;
+  margin-top: -1.5em;
+  padding: 0.1em;
+}
+.team>h3{
+  float: left;
+  margin: 0;
+  background: white;
+  margin-top: -1.5em;
+  padding: 0.1em;
+}
