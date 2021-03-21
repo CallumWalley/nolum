@@ -1,25 +1,10 @@
 import './App.css';
 import { useEffect, useState } from "react";
 import TransactionEditorTable from "./TransactionEditorTable";
+import { useBS } from "./models";
 
 function CallumQuoteBox() {
-  const [quote, setQuote] = useState();
-  useEffect(() => {
-    // Fetch the freshest bull.
-    fetch("/bullshit").then(
-      response => {
-        if (!response.ok) {
-          throw new Error(response.statusText);
-        }
-        return response.text();
-      }
-    ).then(content => {
-      setQuote(content);
-    }).catch(error => {
-      console.error("Error occurred while fetching Callum's quotes", error);
-      setQuote(":(")
-    });
-  }, [setQuote]);
+  const {quote} = useBS();
   if (quote === undefined) {
     return null;
   }
@@ -29,11 +14,11 @@ function CallumQuoteBox() {
 }
 
 function InputFileList(){
-  return
+  return null;
 }
 
 function InjestedFileList(){
-  return
+  return null;
 }
 
 function App() {
@@ -64,6 +49,7 @@ function App() {
       </div>
       <div id='injestion-team' className='team'>
         <h3>Injest Tagged Data</h3>
+        <TransactionEditorTable />
           <button>Injest</button>
         </div>
       </div>
