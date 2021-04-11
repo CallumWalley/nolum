@@ -4,7 +4,7 @@ import csv
 import json
 import urllib.request
 import hashlib
-import model as mdl
+from flaskr import model as mdl
 from flask import Flask
 app = Flask(__name__)
 
@@ -13,7 +13,6 @@ db_placeholder = [
     {"name": "06-0169-0179253-04_Transactions_2019-02-16_2019-12-31.csv", "md5sum": "fake", "path": "data"}]
 
 DbSession = mdl.create_session_maker()
-
 
 def ls(dataPath):
     outlist = []
