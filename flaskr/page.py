@@ -4,19 +4,21 @@ import csv
 import json
 import urllib.request
 import hashlib
+import model as mdl
 from flask import Flask
-
 app = Flask(__name__)
 
 dataPath = "../data"
 db_placeholder = [
     {"name": "06-0169-0179253-04_Transactions_2019-02-16_2019-12-31.csv", "md5sum": "fake", "path": "data"}]
 
+DbSession = mdl.create_session_maker()
+
 
 def ls(dataPath):
     outlist = []
-    for file in os.listdir(dataPath):
-        newpath = os.path.join(dataPath, file)
+    for filename in os.listdir(dataPath):
+        newpath = os.path.join(dataPath, filename)
         if os.path.isdir(newpath):
             for f in ls(newpath):
                 outlist.append(f)
@@ -26,8 +28,8 @@ def ls(dataPath):
             # if file in map(lambda x: x["name"], db_placeholder)
             # If in database, but hex different, add to csv_files_digested_changed.
             # If in database, don't add.
-            outlist.append({"name": newpath, "hd5sum": hd5sum})
-    return {"inputFiles": outlist}
+            outlist.append({"path": newpath, "filename": filename, "hd5sum": hd5sum})
+    return outlist
 
 @app.route('/bullshit')
 def hello():
@@ -35,11 +37,22 @@ def hello():
 
 @app.route('/input-files')
 def inputfiles():
-    foundInputFiles = ls("../data")
-    newFiles = filter(lambda x: x['name'] not in map(
-        lambda y: y["name"], db_placeholder), foundInputFiles)
-    newFiles = foundInputFiles
-    return list(map(lambda x: {'label': x["name"], 'value': x["name"]}, newFiles))
+    session = DbSession()
+    
+    # All files in input directory.
+    inputFiles = ls("../data")
+
+    # Tag if file with same hash/name exists in db.
+    for inputFile in inputFiles:
+
+        filenameMatches = session.query(mdl.InputSource).filter(mdl.InputSource.filename == inputFile["filename"]).all()
+        hashMatches = session.query(mdl.InputSource).filter(mdl.InputSource.hd5sum == inputFile["hd5sum"]).all()
+        inputFile["filenameindb"] = len(filenameMatches) > 0
+        inputFile["hashindb"] = len(hashMatches) > 0           
+
+    return {"input-files":inputFiles}
+    # newFiles = foundInputFiles
+    # return list(map(lambda x: {'label': x["name"], 'value': x["name"]}, newFiles))
 
 # @app.route('/injested-files')
 # def inputfiles():
@@ -48,28 +61,38 @@ def inputfiles():
 
 #     return list(map(lambda x: {'label': x["name"], 'value': x["name"]}, newFiles))
 # @app.route('/')
-# def injestDoc(input):
-#     input_files_by_name = find_input_files_by_name()
-#     # print("My input source is " + str(inputSource))
-#     # print(list(filter(lambda x: x["name"]==inputSource, foundInputFiles)))
-#     if inputSource is None:
-#         return
-#     session = DbSession()
-#     for source in inputSource:
-#         matched_file = input_files_by_name[source]
-#         filename = os.path.basename(source)
-#         ingestion_date = date.today()
-#         hd5sum = matched_file["hd5sum"]
-#         if len(session.query(mdl.InputSource).filter(mdl.InputSource.path == source).all()) > 0:
-#             # Skip ingest if already imported
-#             print(f"Skipping import for {filename} as already in database.")
-#             continue
-#         session.add(mdl.InputSource(path=source, filename=filename,
-#                                     hd5sum=hd5sum, ingest_date=ingestion_date))
-#     # Save all to the session
-#     print(f"Committing {len(session.new)} object(s) into database.")
-#     session.commit()
-#     session.close()
+
+
+def updateInjestedList():
+    session = DbSession()
+    for entry in session.query(mdl.InputSource).all():
+        print("entry")
+    # session.close()
+
+
+def injestDoc(input):
+    # 'Input' is an array of id's from the input files list.
+    input_files_by_name = find_input_files_by_name()
+    # print("My input source is " + str(inputSource))
+    # print(list(filter(lambda x: x["name"]==inputSource, foundInputFiles)))
+    if inputSource is None:
+        return
+    session = DbSession()
+    for source in inputSource:
+        matched_file = input_files_by_name[source]
+        filename = os.path.basename(source)
+        ingestion_date = date.today()
+        hd5sum = matched_file["hd5sum"]
+        if len(session.query(mdl.InputSource).filter(mdl.InputSource.path == source).all()) > 0:
+            # Skip ingest if already imported
+            print(f"Skipping import for {filename} as already in database.")
+            continue
+        session.add(mdl.InputSource(path=source, filename=filename,
+                                    hd5sum=hd5sum, ingest_date=ingestion_date))
+    # Save all to the session
+    print(f"Committing {len(session.new)} object(s) into database.")
+    session.commit()
+    session.close()
 
 
 def updateTagTable(input_files):

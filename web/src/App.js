@@ -18,7 +18,7 @@ function CallumQuoteBox() {
       setQuote(content);
     }).catch(error => {
       console.error("Error occurred while fetching Callum's quotes", error);
-      setQuote("Wisdom to profound to display in this primitive medium.")
+      setQuote("Todays wisdom is too profound to display through this primitive medium.")
     });
   }, [setQuote]);
   if (quote === undefined) {
