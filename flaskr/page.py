@@ -1,12 +1,17 @@
-from flask import Flask
 import os
 import re
 import csv
 import json
 import urllib.request
 import hashlib
+from flask import Flask
 
 app = Flask(__name__)
+
+dataPath = "../data"
+db_placeholder = [
+    {"name": "06-0169-0179253-04_Transactions_2019-02-16_2019-12-31.csv", "md5sum": "fake", "path": "data"}]
+
 
 def ls(dataPath):
     outlist = []
@@ -22,11 +27,11 @@ def ls(dataPath):
             # If in database, but hex different, add to csv_files_digested_changed.
             # If in database, don't add.
             outlist.append({"name": newpath, "hd5sum": hd5sum})
-    return outlist
+    return {"inputFiles": outlist}
 
 @app.route('/bullshit')
 def hello():
-    return re.search(r'\n<li>(.*)</li>', urllib.request.urlopen('http://cbsg.sf.net').read().decode('UTF-8')).group(1)
+    return {"bullshit": re.search(r'\n<li>(.*)</li>', urllib.request.urlopen('http://cbsg.sf.net').read().decode('UTF-8')).group(1)}
 
 @app.route('/input-files')
 def inputfiles():

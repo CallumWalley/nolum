@@ -1,5 +1,7 @@
 import './App.css';
 import { useEffect, useState } from "react";
+import TransactionEditorTable from "./TransactionEditorTable";
+import { useBS } from "./models";
 
 function CallumQuoteBox() {
   const [quote, setQuote] = useState();
@@ -37,7 +39,7 @@ function InputFileList(){
       console.log(response.text());
     }
   ).catch(error => {
-    console.error("ESomething went wrong fetching input files.", error);
+    console.error("Something went wrong fetching input files.", error);
   });
   return null
 }
@@ -74,6 +76,7 @@ function App() {
       </div>
       <div id='injestion-team' className='team'>
         <h3>Injest Tagged Data</h3>
+        <TransactionEditorTable />
           <button>Injest</button>
         </div>
       </div>
