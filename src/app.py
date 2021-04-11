@@ -39,13 +39,6 @@ transaction_types = ["credit", "transfer",
 # class DataTable(dash_table.DataTable):
 foundInputFiles = {}
 
-def get_bullshit():
-    try:
-        return [html.Q(children=re.search(r'\n<li>(.*)</li>', urllib.request.urlopen('http://cbsg.sf.net').read().decode('UTF-8')).group(1)), html.P(children=' - Noel Zeng')]
-    except:
-        return ":("
-
-
 def ls(dataPath):
     outlist = []
     for file in os.listdir(dataPath):

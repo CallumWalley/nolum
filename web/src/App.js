@@ -16,29 +16,40 @@ function CallumQuoteBox() {
       setQuote(content);
     }).catch(error => {
       console.error("Error occurred while fetching Callum's quotes", error);
-      setQuote(":(")
+      setQuote("Wisdom to profound to display in this primitive medium.")
     });
   }, [setQuote]);
   if (quote === undefined) {
     return null;
   }
   return (<p id='daily-wisdom'>
-    {quote} - Callum W.
+    <i>{quote}</i>- Callum W.
   </p>)
 }
 
+// Yea, so this doesn't work. If I just send a serialised list, is that enough to generate it? xoxo
 function InputFileList(){
-  return
+  fetch("/input-files").then(
+    response => {
+      if (!response.ok) {
+        throw new Error(response.statusText);
+      }
+      console.log(response.text());
+    }
+  ).catch(error => {
+    console.error("ESomething went wrong fetching input files.", error);
+  });
+  return null
 }
 
-function InjestedFileList(){
-  return
-}
+// function InjestedFileList(){
+//   return
+// }
 
 function App() {
   return (
     <div className="App">
-      <h1>NoLum Cloud-Native Deep-Learning Hyper-Ledger, v2</h1>
+      <h1>NoLum<sup>&copy;</sup> Cloud-Native Deep-Learning Hyper-Ledger  <small>v2.0.0</small></h1>
       <CallumQuoteBox />
       <div id="operations-department" className="department">
         <h2>Operations</h2>
@@ -57,7 +68,7 @@ function App() {
               <div className="injest-file-header pseudo-dash">
                 <p>Digested input files</p>
                 <button className='refresh-button'>⟳</button></div>
-              <div className='radio-scroll'><InjestedFileList/></div>
+              {/* <div className='radio-scroll'><InjestedFileList/></div> */}
             </div>
           </div>
       </div>

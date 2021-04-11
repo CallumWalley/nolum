@@ -30,12 +30,18 @@ def hello():
 
 @app.route('/input-files')
 def inputfiles():
-    foundInputFiles = ls(dataPath)
+    foundInputFiles = ls("../data")
     newFiles = filter(lambda x: x['name'] not in map(
         lambda y: y["name"], db_placeholder), foundInputFiles)
-
+    newFiles = foundInputFiles
     return list(map(lambda x: {'label': x["name"], 'value': x["name"]}, newFiles))
 
+# @app.route('/injested-files')
+# def inputfiles():
+#     newFiles = filter(lambda x: x['name'] not in map(
+#         lambda y: y["name"], db_placeholder), foundInputFiles)
+
+#     return list(map(lambda x: {'label': x["name"], 'value': x["name"]}, newFiles))
 # @app.route('/')
 # def injestDoc(input):
 #     input_files_by_name = find_input_files_by_name()
@@ -63,7 +69,6 @@ def inputfiles():
 
 def updateTagTable(input_files):
     fullList = []
-    # ns = Namespace("myNamespace", "tabulator")
 
     if input_files:
         for input_file in input_files:
@@ -72,27 +77,28 @@ def updateTagTable(input_files):
                 csv_reader = csv.reader(csv_file, delimiter=',')
                 for line in csv_reader:
                     fullList.append(list(line) + [input_file])
-    columns = [
-        #{"name": "ID", "id": "id"},
-        {"title": "Import", "field": "include", "sorter": "boolean",
-            "editor": True, "formatter": "tickCross", "tooltip": "Tooltip!"},
-        {"title": "Date", "field": "date", "sorter": "date", "sorterParams": {
-            "format": "YYYY-MM-DD"}, "tooltip": "Tooltip!"},
-        {"title": "From", "field": "from", 
-            "sorter": "alphanum", "editor": "autocomplete", "tooltip": "Tooltip!", "editorParams":{
-                "freetext":True, "showListOnEmpty":True, "values":["person1", "person2", "person3"], "searchFunc":ns_tab("fromFreetext"),
-            }},
-        {"title": "To", "field": "to", "editor": True, "tooltip": "Tooltip!"},
-        {"title": "Amount", "field": "amount", "sorter": "number",
-            "formatter": "money", "editor": True, "tooltip": "Tooltip!"},
-        {"title": "Type", "field": "pay_type", "tooltip": "Tooltip!",
-            "editor": "select", "editorParams": {"values": transaction_types}},
-        {"title": "Tags", "field": "tags", "tooltip": "Tooltip!"},
-        {"title": "Details", "field": "details", "tooltip": "Tooltip!"},
-        {"name": "Source", "id": "source"},
-        {"name": "Raw String", "id": "raw_string"},
-        {"title": "Confidence", "field": "confidence"}
-    ]
+    # columns = [
+    #     #{"name": "ID", "id": "id"},
+    #     {"title": "Import", "field": "include", "sorter": "boolean",
+    #         "editor": True, "formatter": "tickCross", "tooltip": "Tooltip!"},
+    #     {"title": "Date", "field": "date", "sorter": "date", "sorterParams": {
+    #         "format": "YYYY-MM-DD"}, "tooltip": "Tooltip!"},
+    #     {"title": "From", "field": "from", 
+    #         "sorter": "alphanum", "editor": "autocomplete", "tooltip": "Tooltip!", "editorParams":{
+    #             "freetext":True, "showListOnEmpty":True, "values":["person1", "person2", "person3"], "searchFunc":ns_tab("fromFreetext"),
+    #         }},
+    #     {"title": "To", "field": "to", "editor": True, "tooltip": "Tooltip!"},
+    #     {"title": "Amount", "field": "amount", "sorter": "number",
+    #         "formatter": "money", "editor": True, "tooltip": "Tooltip!"},
+    #     {"title": "Type", "field": "pay_type", "tooltip": "Tooltip!",
+    #         "editor": "select", "editorParams": {"values": transaction_types}},
+    #     {"title": "Tags", "field": "tags", "tooltip": "Tooltip!"},
+    #     {"title": "Details", "field": "details", "tooltip": "Tooltip!"},
+    #     {"name": "Source", "id": "source"},
+    #     {"name": "Raw String", "id": "raw_string"},
+    #     {"title": "Confidence", "field": "confidence"}
+    # ]
+    
     data = list(map(lambda x: {
         "include": True,
         "date": x[6],
