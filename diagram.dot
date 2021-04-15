@@ -1,0 +1,27 @@
+digraph D {
+    subgraph cluster_b_end {
+        color=black
+        label="Back end"
+        stor_dir [label="storage directory"]
+        graph[style=dotted];
+        subgraph cluster_sqlit {
+            label="SQL"
+            inj_tb [label="'InputSource' "]
+            trans_tb [label="'BankTransaction'"]
+            acct_tb [label="'Account'"]
+            ent_tb [label="'Entity'"]
+
+        }
+        stor_dir -> inj_tb
+    }
+    subgraph cluster_f_end {
+        label="Front end"
+        avail_file [label="List of available files"]
+        inj_files [label="List of injested files"]
+        tag_tab [label="Tag table"]
+    }
+    stor_dir -> avail_file [label="Available files (undigested)"]
+    inj_tb -> inj_files
+    avail_file -> stor_dir [label="Selected files"]
+    stor_dir -> tag_tab
+}
