@@ -4,20 +4,21 @@ import "react-tabulator/lib/css/tabulator.min.css"
 import { useEffect } from "react";
 
 const columns = [
-    { title: "Name", field: "name", width: 150 },
-    { title: "Age", field: "age", hozAlign: "left", formatter: "progress" },
-    { title: "Favourite Color", field: "col" },
-    { title: "Date Of Birth", field: "dob", hozAlign: "center" },
-    { title: "Rating", field: "rating", hozAlign: "center", formatter: "star" },
-    { title: "Passed?", field: "passed", hozAlign: "center", formatter: "tickCross" }
+    { title: "Date", field: "date", sorter: "date"},
+    { title: "Time", field: "time", sorter: "time"},
+    { title: "Amount", field: "amount", sorter:"numeric", formatter:"money",},
+    { title: "From", field: "from"},
+    { title: "Item/Service", field: "thing", editor:"input"},
+    { title: "Payment Type", field: "type" },
+    { title: "Category", field: "category", headerSort: false},
+    { title: "Tags", field: "tags", headerSort: false},
+    { title: "Confidence", field: "confidence", sorter:"numeric", formatter: "progress", formatterParams:{min:0, max:1,legendColor:"#FFFFFF", legend:function(value){return `${value*100}%`}}},
+    { title: "Input File", field: "input", sorter: "string"},
+    { title: "", field: "valid", formatter: "tickCross", editor: "tickCross", headerSort: false, width:2}
   ];
 
 const data = [
-    {id:1, name:"Oli Bob", age:"12", col:"red", dob:""},
-    {id:2, name:"Mary May", age:"1", col:"blue", dob:"14/05/1982"},
-    {id:3, name:"Christine Lobowski", age:"42", col:"green", dob:"22/05/1982"},
-    {id:4, name:"Brendon Philips", age:"125", col:"orange", dob:"01/08/1980"},
-    {id:5, name:"Margret Marmajuke", age:"16", col:"yellow", dob:"31/01/1999"},
+    {id:1, date:"10/10/10", time:"1:00:00", amount:"100.50", from:"Example Person", thing:"Coffee", type:"Dropdown", category:"Category->Category", tags:"Tag tag tag", confidence:0.9, valid:true, input:"06-0169-0179253-04_Transactions_2019-02-16_2019-12-31.csv"},
   ];
 
 function TransactionEditorTable() {
@@ -28,7 +29,7 @@ function TransactionEditorTable() {
         data={data}
         columns={columns}
         tooltips={true}
-        layout={"fitData"}
+        layout={"fitColumns"}
         />);
 }
 
