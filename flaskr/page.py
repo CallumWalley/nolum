@@ -13,6 +13,8 @@ dataPath = "../data"
 db_placeholder = [
     {"name": "06-0169-0179253-04_Transactions_2019-02-16_2019-12-31.csv", "md5sum": "fake", "path": "data"}]
 
+DbSession = mdl.create_session_maker()
+
 def ls(dataPath):
     outlist = []
     for filename in os.listdir(dataPath):
@@ -52,15 +54,19 @@ def inputfiles():
             mdl.InputSource.hd5sum == inputFile["hd5sum"]).all()
         inputFile["filenameindb"] = len(filenameMatches) > 0
         inputFile["hashindb"] = len(hashMatches) > 0
-
-    return inputFiles
+    
+    session.close()
+    return {"list":inputFiles}
     # newFiles = foundInputFiles
     # return list(map(lambda x: {'label': x["name"], 'value': x["name"]}, newFiles))
 
 # GET to be displayed as list
 @app.route('/injested-files')
 def injestedfiles():
-    return [injested_file.__dict__ for injested_file in session.query(mdl.InputSource).all()]
+    session = DbSession()
+    return_list={"list":[injested_file.__dict__ for injested_file in session.query(mdl.InputSource).all()]}
+    session.close()
+    return return_list
 
 # POST 
 @app.route('/tag-table')
@@ -115,48 +121,48 @@ def tagTable(input_files):
 
 
 # POST selected input files, and the modified content of the tagtable
-@app.route('/injest-file')
-def injestfile(input_files, tag_table):
-    # 'Input' is an array of id's from the input files list.
+# @app.route('/injest-file')
+# def injestfile(input_files, tag_table):
+#     # 'Input' is an array of id's from the input files list.
 
-    # Do input validation here. e.g. get input from file that matches 
-    input_files_by_name = find_input_files_by_name()
-    # if len(session.query(mdl.InputSource).filter(mdl.InputSource.path == source).all()) > 0:
-    #     # Skip ingest if already imported
-    #     print(f"Skipping import for {filename} as already in database.")
-    #     continue
-    # print("My input source is " + str(inputSource))
-    # print(list(filter(lambda x: x["name"]==inputSource, foundInputFiles)))
-    if inputSource is None:
-        return
-    session = DbSession()
+#     # Do input validation here. e.g. get input from file that matches 
+#     input_files_by_name = find_input_files_by_name()
+#     # if len(session.query(mdl.InputSource).filter(mdl.InputSource.path == source).all()) > 0:
+#     #     # Skip ingest if already imported
+#     #     print(f"Skipping import for {filename} as already in database.")
+#     #     continue
+#     # print("My input source is " + str(inputSource))
+#     # print(list(filter(lambda x: x["name"]==inputSource, foundInputFiles)))
+#     if inputSource is None:
+#         return
+#     session = DbSession()
 
-    # Save the injested docs to database.
-    for source in inputSource:
-        matched_file = input_files_by_name[source]
-        filename = os.path.basename(source)
-        ingestion_date = date.today()
-        hd5sum = matched_file["hd5sum"]
-        session.add(mdl.InputSource(path=source, filename=filename,
-                                    hd5sum=hd5sum, ingest_date=ingestion_date))
+#     # Save the injested docs to database.
+#     for source in inputSource:
+#         matched_file = input_files_by_name[source]
+#         filename = os.path.basename(source)
+#         ingestion_date = date.today()
+#         hd5sum = matched_file["hd5sum"]
+#         session.add(mdl.InputSource(path=source, filename=filename,
+#                                     hd5sum=hd5sum, ingest_date=ingestion_date))
 
-    for row in tag_table:
-        session.add(mdl.BankTransaction(
-            raw_string="",
-            input_source_id="input_source_id",
-            to_account_id="id"
-            from_account_id="id"
-            amount=""
-            pay_type=""
-            details=""
-            date=""
-            tags=""
-            ml_data=""))
+#     for row in tag_table:
+#         session.add(mdl.BankTransaction(
+#             raw_string="",
+#             input_source_id="input_source_id",
+#             to_account_id="id",
+#             from_account_id="id",
+#             amount="",
+#             pay_type="",
+#             details="",
+#             date="",
+#             tags="",
+#             ml_data=""))
 
-    # Save all to the session
-    print(f"Committing {len(session.new)} object(s) into database.")
-    session.commit()
-    session.close()
+#     # Save all to the session
+#     print(f"Committing {len(session.new)} object(s) into database.")
+#     session.commit()
+#     session.close()
 
 
 # Add
