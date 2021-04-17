@@ -59,9 +59,6 @@ class Entity(Base):
 
 # class Misc(Invoiceable):
 
-
-
-
 # class Invoice(Base):
 #     """Two entities and a list of hours"""
 #     __tablename__:"invoice"
@@ -74,3 +71,8 @@ def create_session_maker():
     engine = create_engine("sqlite:///data.db")
     Base.metadata.create_all(engine)
     return sessionmaker(engine)
+
+
+# Example adding
+
+#session.add(mdl.InputSource(path=source, filename=filename,hd5sum=hd5sum, ingest_date=ingestion_date))
