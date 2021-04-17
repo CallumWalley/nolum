@@ -1,0 +1,4 @@
+{
+    "trans_types": ["Visa Purchase", "Direct Credit", "Direct Debit", "Eft-Pos", "Bank Fee", "Transfer", "Payment"],
+    "categories": {"housing":{"rent":1}, "utilities":{"water":8}, "transport":{"public-transport":2},"food":{"groceries":3, "coffee":4}, "health":{"meds":7}, "entertainment":{"games":5}}
+}
