@@ -11,7 +11,9 @@ const fetcher = (...args) => (
 );
 
 export function useBS() {
-    const {data, error, isValidating} = useSWR(`/bullshit`, fetcher);
+    const {data, error, isValidating} = useSWR(`/bullshit`, fetcher, {
+      revalidateOnFocus: false
+    });
 
     return {
         quote: data ? data.bullshit : undefined,
@@ -20,11 +22,12 @@ export function useBS() {
     }
 }
 
-export function useInputSource (id) {
-    const { data, error, isValidating } = useSWR(`/input-file/${id}`, fetcher);
+export function useInputSource (id = "") {
+  const url = id !== "" ? `/input-files/${id}` : "/input-files"
+    const { data, error, isValidating } = useSWR(url, fetcher);
 
     return {
-        inputSource: data,
+        inputSource: data ? data.list : undefined,
         isValidating,
         error
     }
