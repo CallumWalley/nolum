@@ -6,7 +6,7 @@ import urllib.request
 import hashlib
 import datetime as dt
 from flaskr import model as mdl
-from flaskr import train as ai
+# from flaskr import train as ai
 from flask import Flask
 app = Flask(__name__)
 
@@ -39,7 +39,7 @@ def ls(dataPath):
 # GET to be used in header.
 @app.route('/bullshit')
 def hello():
-    return re.search(r'\n<li>(.*)</li>', urllib.request.urlopen('http://cbsg.sf.net').read().decode('UTF-8')).group(1)
+    return {"bullshit": re.search(r'\n<li>(.*)</li>', urllib.request.urlopen('http://cbsg.sf.net').read().decode('UTF-8')).group(1)}
 
 # GET to be displayed as list
 @app.route('/input-files')
@@ -60,7 +60,7 @@ def inputfiles():
         input_file["hashindb"] = len(hashMatches) > 0
     
     session.close()
-    return {"list":input_file}
+    return {"list":input_files}
     # newFiles = foundInputFiles
     # return list(map(lambda x: {'label': x["name"], 'value': x["name"]}, newFiles))
 
