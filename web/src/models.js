@@ -24,10 +24,10 @@ export function useBS() {
 
 export function useInputSource (id = "") {
   const url = id !== "" ? `/input-files/${id}` : "/input-files"
-    const { data, error, isValidating } = useSWR(url, fetcher);
+    const { data = {list: []}, error, isValidating } = useSWR(url, fetcher);
 
     return {
-        inputSource: data ? data.list : undefined,
+        inputSource: data.list,
         isValidating,
         error
     }
