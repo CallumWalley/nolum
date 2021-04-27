@@ -13,16 +13,13 @@ function CallumQuoteBox() {
   </p>);
 }
 
-// Yea, so this doesn't work. If I just send a serialised list, is that enough to generate it? xoxo
 function InputFileList(){
   const { inputSource, isValidating, error } = useInputSource();
-  let listItems;
-  if (inputSource){
-    listItems = inputSource.map(file => (
-      <li className="pseudo-tabulate-row" key={file.filename}><input type="checkbox"></input>{file.filename}</li>
-    ))
-  }
-  return <ul>{listItems}</ul>;
+  return <ul>
+    {inputSource.map((file, index) => (
+      <li className="pseudo-tabulate-row" key={index + file.filename}><input type="checkbox"></input>{file.filename}</li>
+    ))}
+  </ul>;
 }
 
 // function InjestedFileList(){
