@@ -13,7 +13,7 @@ import tensorflow as tf
 
 from tensorflow import feature_column
 from tensorflow.keras import layers
-from sklearn.model_selection import train_test_split
+#from sklearn.model_selection import train_test_split
 
 
 def proccess_input(input_string, row_num, input_file):

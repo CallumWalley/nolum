@@ -6,13 +6,14 @@ import urllib.request
 import hashlib
 import datetime as dt
 from flaskr import model as mdl
+
 # from flaskr import train as ai
 from flask import Flask
+from flask import request
+
 app = Flask(__name__)
 
 dataPath = "../data"
-db_placeholder = [
-    {"name": "06-0169-0179253-04_Transactions_2019-02-16_2019-12-31.csv", "md5sum": "fake", "path": "data"}]
 
 # Gross global variable.
 input_files = []
@@ -63,15 +64,7 @@ def inputfiles():
     return {"list":input_files}
     # newFiles = foundInputFiles
     # return list(map(lambda x: {'label': x["name"], 'value': x["name"]}, newFiles))
-
-# GET to be displayed as list
-@app.route('/injested-files')
-def injestedfiles():
-    session = DbSession()
-    return_list={"list":[injested_file.__dict__ for injested_file in session.query(mdl.InputSource).all()]}
-    session.close()
-    return return_list
-
+    
 # POST On select input file
 # return suggestion table 
 @app.route('/tag-table')
@@ -86,51 +79,53 @@ def tagTable(input_files):
                 for line in csv_reader:
                     fullList.append(ai.proccessInput(line, row_num, input_file)) #list(line) + [input_file]
                     row_num+=1
-    print(fullList)
     return fullList
 
 
 # POST selected input files, and the modified content of the tagtable
 # @app.route('/injest-file')
+@app.route('/injested-files', methods = ['GET', 'POST'])
 def injestfile(input_files, tag_table):
-    # 'Input' is an array of id's from the input files list.
-    # Do input validation here. e.g. get input from file that matches 
-    input_files_by_name = find_input_files_by_name()
+    if request.method == 'GET':
+        session = DbSession()
+        return_list={"list":[injested_file.__dict__ for injested_file in session.query(mdl.InputSource).all()]}
+        session.close()
+        return return_list
+    if request.method == 'POST':
+        data = request.form # a multidict containing POST data
 
-    if inputSource is None:
-        return
-    session = DbSession()
+        input_files_by_name = find_input_files_by_name()
 
-    # Save the injested docs to database.
-    for source in inputSource:
-        matched_file = input_files_by_name[source]
-        filename = os.path.basename(source)
-        ingestion_date = date.today()
-        hd5sum = matched_file["hd5sum"]
-        session.add(mdl.InputSource(path=source, filename=filename,
-                                    hd5sum=hd5sum, ingest_date=ingestion_date))
+        if inputSource is None:
+            return
+        session = DbSession()
 
-    for row in tag_table:
-        ai.learn(row)
-        session.add(mdl.BankTransaction(
-            raw_string="",
-            input_source_id="input_source_id",
-            to_account_id="id",
-            from_account_id="id",
-            amount="",
-            pay_type="",
-            details="",
-            date="",
-            tags="",
-            ml_data=""))
-    
-    session.commit()
-    session.close()
+        # Save the injested docs to database.
+        for source in input_files:
+            matched_file = input_files_by_name[source]
+            filename = os.path.basename(source)
+            ingestion_date = date.today()
+            hd5sum = matched_file["hd5sum"]
+            session.add(mdl.InputSource(path=source, filename=filename,
+                                        hd5sum=hd5sum, ingest_date=ingestion_date))
 
-#     # Save all to the session
-#     print(f"Committing {len(session.new)} object(s) into database.")
-
-
+        for row in tag_table:
+            ai.learn(row)
+            session.add(mdl.BankTransaction(
+                raw_string="",
+                input_source_id="input_source_id",
+                to_account_id="id",
+                from_account_id="id",
+                amount="",
+                pay_type="",
+                details="",
+                date="",
+                tags="",
+                ml_data=""))
+        
+        session.commit()
+        session.close()
+        #data = request.form # a multidict containing POST data
 
 # Add
 # DbSession = mdl.create_session_maker()
