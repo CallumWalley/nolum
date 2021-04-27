@@ -41,11 +41,11 @@ function App() {
           {/* <label>Target Account</label> */}
           <div id="file-select-tables">
             <div className="file-select-table">
-              <div className="injest-file-header pseudo-tabulate">
+              <div className="injest-file-header">
                 <p>Undigested input files</p>
                 <button id='injest-file-selector-refresh-button' className="refresh-button">⟳</button>
               </div>
-              <div className='radio-scroll' id='injest-file-selector-wrap pseudo-tabulate'><InputFileList/></div>
+              <div className='radio-scroll pseudo-tabulate' id='injest-file-selector-wrap'><InputFileList/></div>
             </div>
             <div className='file-select-table'>
               <div className="injest-file-header pseudo-tabulate">
