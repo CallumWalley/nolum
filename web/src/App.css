@@ -8,17 +8,28 @@
 .account-selector {
   width: 30em;  
 }
-.pseudo-dash{
-  border-width: 1px;
-  border-style: solid;
-  border-color: rgb(211, 211, 211);
-  background-color: #fafafa;
-  color: rgb(50, 50, 50);
-  font-family: monospace;
-  font-size: 12.1875px;
-  font-weight: 400;
+.pseudo-tabulate {
+  color: rgb(85, 85, 85);
+  display: inline-block;
   box-sizing: border-box;
 }
+.pseudo-tabulate>ul{
+  padding: 0;
+  margin: 0;
+}
+.pseudo-tabulate-row{
+  box-sizing: border-box;
+  display: block;
+  font-size: 14px;
+  padding: 4px;
+  border-right: 1px solid #aaa;
+  vertical-align: middle;
+  text-overflow: ellipsis;
+
+}
+.pseudo-tabulate-row:nth-child(even) {background-color: #efefef;}
+.pseudo-tabulate-row:nth-child(odd) {background-color: #FFF}
+
 .injest-file-header {
   display: flex;
 }
