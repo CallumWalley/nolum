@@ -17,7 +17,7 @@ function InputFileList(){
   const { inputSource, isValidating, error } = useInputSource();
   return <ul>
     {inputSource.map((file, index) => (
-      <li key={index + file.filename}>{file.filename}</li>
+      <li className="pseudo-tabulate-row" key={index + file.filename}><input type="checkbox"></input>{file.filename}</li>
     ))}
   </ul>;
 }
@@ -38,14 +38,14 @@ function App() {
           {/* <label>Target Account</label> */}
           <div id="file-select-tables">
             <div className="file-select-table">
-              <div className="injest-file-header pseudo-dash">
+              <div className="injest-file-header pseudo-tabulate">
                 <p>Undigested input files</p>
                 <button id='injest-file-selector-refresh-button' className="refresh-button">⟳</button>
               </div>
-              <div className='radio-scroll' id='injest-file-selector-wrap'><InputFileList/></div>
+              <div className='radio-scroll' id='injest-file-selector-wrap pseudo-tabulate'><InputFileList/></div>
             </div>
             <div className='file-select-table'>
-              <div className="injest-file-header pseudo-dash">
+              <div className="injest-file-header pseudo-tabulate">
                 <p>Digested input files</p>
                 <button className='refresh-button'>⟳</button></div>
               {/* <div className='radio-scroll'><InjestedFileList/></div> */}
