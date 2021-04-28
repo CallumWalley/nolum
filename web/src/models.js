@@ -32,3 +32,14 @@ export function useInputSource (id = "") {
         error
     }
 }
+
+export function useInjestedSource (id = "") {
+  const url = id !== "" ? `/injested-files/${id}` : "/injested-files"
+    const { data = {list: []}, error, isValidating } = useSWR(url, fetcher);
+
+    return {
+        inputSource: data.list,
+        isValidating,
+        error
+    }
+}

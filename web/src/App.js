@@ -1,7 +1,7 @@
 import './App.css';
 import { useEffect, useState } from "react";
 import TransactionEditorTable from "./TransactionEditorTable";
-import { useBS, useInputSource } from "./models";
+import { useBS, useInputSource, useInjestedSource } from "./models";
 
 function CallumQuoteBox() {
   const {quote, error, isLoading } = useBS();
@@ -15,6 +15,7 @@ function CallumQuoteBox() {
 
 function InputFileList(){
   const { inputSource, isValidating, error } = useInputSource();
+  if (! inputSource) <ul></ul>
   return <ul>
     {inputSource.map((file, index) => (
       <li className="pseudo-tabulate-row" key={index + file.filename}><input type="checkbox"></input>{file.filename}</li>
@@ -22,6 +23,15 @@ function InputFileList(){
   </ul>;
 }
 
+function InjestedFileList(){
+  const { inputSource, isValidating, error } = useInjestedSource();
+  if (! inputSource) return <ul></ul>
+  return <ul>
+    {inputSource.map((file, index) => (
+      <li className="pseudo-tabulate-row" key={index + file.filename}><input type="button"></input>{file.filename}</li>
+    ))}
+  </ul>;
+}
 // function InjestedFileList(){
 //   return
 // }
@@ -45,10 +55,10 @@ function App() {
               <div className='radio-scroll pseudo-tabulate' id='injest-file-selector-wrap'><InputFileList/></div>
             </div>
             <div className='file-select-table'>
-              <div className="injest-file-header pseudo-tabulate">
+              <div className="injest-file-header">
                 <p>Digested input files</p>
                 <button className='refresh-button'>⟳</button></div>
-              {/* <div className='radio-scroll'><InjestedFileList/></div> */}
+              <div className='radio-scroll pseudo-tabulate'><InjestedFileList/></div>
             </div>
           </div>
       </div>

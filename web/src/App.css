@@ -86,6 +86,11 @@
 .refresh-button:hover {
   background-color: #FFF;
 }
+ul:empty:after{
+text-align: center;
+display: block;
+content: "-- empty --";
+}
 #daily-wisdom{
   text-align: center;
 }
