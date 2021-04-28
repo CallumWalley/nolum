@@ -68,11 +68,20 @@ import { moment } from "moment"
 // var rawStringRowFormatter = function(row, formatterParams){
 //   //cell - the cell component
 //   //formatterParams - parameters set for the column
-//   row.getElement().innerHTML+=`<div id={row.get}>${row.getData.rawString}</div>`
+//   var contextShow = document.createElement("button")
+//   // row.getElement().prepend('<button>clickme</button>')
+//   contextShow.innerHTML="L"
+//   contextShow.onclick= function() { alert('click'); };
+//   row.getElement().insertBefore(contextShow, row.getElement().firstElementChild);
+//   row.getElement().innerHTML+=`<div class="raw-string-context" id={row.get}>${row.getData().rawString}</div>`
 //   //return `<button>click</button><div class="test-class-child">${cell.getValue()}</div>` //return the contents of the cell;
 // }
 
+// See https://github.com/ngduc/react-tabulator/issues/40
+
 const columns = [
+   // { formatter:function(cell, formatterParams, onRendered){"<i class='fa fa-print'></i>"}, width:40, align:"center", cellClick:function(e, cell){cell.getRow().getData().rawString}},
+    { title: "", field: "valid", formatter: "tickCross", editor: "tickCross", headerSort: false, width:2},
     { title: "Date", field: "date", sorter:"date"}, // editor:dateEditor},
     { title: "Time", field: "time", sorter: "time"},
     { title: "Amount", field: "amount", sorter:"numeric", formatter:"money",},
@@ -83,8 +92,7 @@ const columns = [
     { title: "Tags", field: "tags", headerSort: false},
     { title: "Confidence", field: "confidence", sorter:"numeric", formatter: "progress", formatterParams:{min:0, max:1,legendColor:"#FFFFFF", legend:function(value){return `${value*100}%`}}},
     { title: "Input File", field: "input", sorter: "string"},
-    { title: "", field: "valid", formatter: "tickCross", editor: "tickCross", headerSort: false, width:2},
-    { title: "", field: "rawString"},
+    //{ title: "", field: "rawString"},
   ];
 
 const data = [
@@ -102,10 +110,9 @@ function TransactionEditorTable() {
         columns={columns}
         tooltips={true}
         layout={"fitColumns"}
-        dataTree={true}
-        dataTreeCollapseElement={"<i class='fas fa-minus-square'></i>"}
-        //rowFormatter={rawStringRowFormatter}
-        
+        // dataTree={true}
+        // dataTreeCollapseElement={"<i class='fas fa-minus-square'></i>"}
+        // rowFormatter={rawStringRowFormatter}    
         />);
 }
 

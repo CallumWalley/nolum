@@ -42,90 +42,97 @@ def ls(dataPath):
 def hello():
     return {"bullshit": re.search(r'\n<li>(.*)</li>', urllib.request.urlopen('http://cbsg.sf.net').read().decode('UTF-8')).group(1)}
 
-# GET to be displayed as list
-@app.route('/input-files')
+# GET: Displays input files.
+# POST: Reads selected input files, proccesses and returns values.
+@app.route('/input-files', methods = ['GET', 'POST'])
 def inputfiles():
+    if request.method == 'GET':
+        session = DbSession()
+
+        # All files in input directory.
+        input_files = ls("../data")
+
+        # Tag if file with same hash/name exists in db.
+        for input_file in input_files:
+
+            filenameMatches = session.query(mdl.InputSource).filter(
+                mdl.InputSource.filename == input_file["filename"]).all()
+            hashMatches = session.query(mdl.InputSource).filter(
+                mdl.InputSource.hd5sum == input_file["hd5sum"]).all()
+            input_file["filenameindb"] = len(filenameMatches) > 0
+            input_file["hashindb"] = len(hashMatches) > 0
+        
+        session.close()
+        return {"list":input_files}
+
+    if request.method == 'POST':
+        selected_files = request.form
+        input_files_by_name = ls(dataPath)
+        fullList = []
+
+        for selected_file in selected_files:
+            try:
+                if selected_file not in input_files_by_name:
+                    raise Exception("Could not find.")
+                with open(selected_file) as csv_file:
+                    csv_reader = csv.reader(csv_file, delimiter=',')
+                    row_num=0
+                    for line in csv_reader:
+                        fullList.append(ai.proccessInput(line, row_num, input_file)) #list(line) + [input_file]
+                        row_num+=1
+            except:
+                pass
+    return {"list":fullList}
+        
+# POST On injest button click
+@app.route('/injest-data', methods = ['POST'])
+def injestdata():
     session = DbSession()
+    tagged_data=request.method
+    input_files=request.method
+    # Save the injested docs to database.
+    for source in input_files:
+        # matched_file = input_files_by_name[source]
+        filename = os.path.basename(source)
+        ingestion_date = date.today()
+        hd5sum = matched_file["hd5sum"]
+        session.add(mdl.InputSource(path=source, filename=filename,
+                                    hd5sum=hd5sum, ingest_date=ingestion_date))
 
-    # All files in input directory.
-    input_files = ls("../data")
+    for row in tag_table:
+        ai.learn(row)
+        session.add(mdl.BankTransaction(
+            raw_string="",
+            input_source_id="input_source_id",
+            to_account_id="id",
+            from_account_id="id",
+            amount="",
+            pay_type="",
+            details="",
+            date="",
+            tags="",
+            ml_data=""))
 
-    # Tag if file with same hash/name exists in db.
-    for input_file in input_files:
-
-        filenameMatches = session.query(mdl.InputSource).filter(
-            mdl.InputSource.filename == input_file["filename"]).all()
-        hashMatches = session.query(mdl.InputSource).filter(
-            mdl.InputSource.hd5sum == input_file["hd5sum"]).all()
-        input_file["filenameindb"] = len(filenameMatches) > 0
-        input_file["hashindb"] = len(hashMatches) > 0
-    
+    session.commit()
     session.close()
-    return {"list":input_files}
+    # Return True? or some shit
+
+
     # newFiles = foundInputFiles
     # return list(map(lambda x: {'label': x["name"], 'value': x["name"]}, newFiles))
-    
-# POST On select input file
-# return suggestion table 
-@app.route('/tag-table')
-def tagTable(input_files):
-    fullList = []
-    
-    if input_files:
-        for input_file in input_files:
-            with open(input_file) as csv_file:
-                csv_reader = csv.reader(csv_file, delimiter=',')
-                row_num=0
-                for line in csv_reader:
-                    fullList.append(ai.proccessInput(line, row_num, input_file)) #list(line) + [input_file]
-                    row_num+=1
-    return fullList
 
-
-# POST selected input files, and the modified content of the tagtable
-# @app.route('/injest-file')
+# GET list files that have already been injested.
+# POST Remove selected file from database and purge all accosiated transactions.
 @app.route('/injested-files', methods = ['GET', 'POST'])
-def injestfile(input_files, tag_table):
+def injestedfiles():
     if request.method == 'GET':
         session = DbSession()
         return_list={"list":[injested_file.__dict__ for injested_file in session.query(mdl.InputSource).all()]}
         session.close()
         return return_list
     if request.method == 'POST':
-        data = request.form # a multidict containing POST data
-
-        input_files_by_name = find_input_files_by_name()
-
-        if inputSource is None:
-            return
-        session = DbSession()
-
-        # Save the injested docs to database.
-        for source in input_files:
-            matched_file = input_files_by_name[source]
-            filename = os.path.basename(source)
-            ingestion_date = date.today()
-            hd5sum = matched_file["hd5sum"]
-            session.add(mdl.InputSource(path=source, filename=filename,
-                                        hd5sum=hd5sum, ingest_date=ingestion_date))
-
-        for row in tag_table:
-            ai.learn(row)
-            session.add(mdl.BankTransaction(
-                raw_string="",
-                input_source_id="input_source_id",
-                to_account_id="id",
-                from_account_id="id",
-                amount="",
-                pay_type="",
-                details="",
-                date="",
-                tags="",
-                ml_data=""))
-        
-        session.commit()
-        session.close()
-        #data = request.form # a multidict containing POST data
+        pass
+        #DO DELETE SHIT
 
 # Add
 # DbSession = mdl.create_session_maker()
