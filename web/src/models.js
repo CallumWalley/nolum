@@ -25,6 +25,16 @@ export function useBS() {
 export function useInputSource (id = "") {
   const url = id !== "" ? `/input-files/${id}` : "/input-files"
     const { data = {list: []}, error, isValidating } = useSWR(url, fetcher);
+    return {
+        inputSource: data.list,
+        isValidating,
+        error
+    }
+}
+
+export function useInjestData (id = "") {
+  const url = id !== "" ? `/injest-data/${id}` : "/injest-data"
+    const { data = {list: []}, error, isValidating } = useSWR(url, fetcher);
 
     return {
         inputSource: data.list,
