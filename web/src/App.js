@@ -15,24 +15,41 @@ function CallumQuoteBox() {
 
 function InputFileList() {
   const { inputSource, isValidating, error } = useInputSource();
-  if (!inputSource)
-  return <ul>
+  const sayFuck = () => alert('FUCK');
+  const data = new FormData(form.current);
+  const inputPost = () => {
+    fetch('http://localhost:5000/input-files', {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        data
+      })
+    })
+  }
+
+
+  if (!inputSource) return <ul></ul>
+//  return  <form action="http://localhost:5000/input-files" method="post">
+return  <form onChange={inputPost} method="post">
     {inputSource.map((file, index) => (
       <li className="pseudo-tabulate-row" key={index + file.filename}><input type="checkbox"></input>{file.filename}</li>
     ))}
-  </ul>;
+  </form>;
 }
 
 //TODO Make whole row active element, not just checkbox.
-// function InjestedFileList() {
-//   const { inputSource, isValidating, error } = useInjestedSource();
-//   if (!inputSource) return <ul></ul>
-//   return <ul>
-//     {inputSource.map((file, index) => (
-//       <li className="pseudo-tabulate-row" key={index + file.filename}><input type="button" ></input>{file.filename}</li>
-//     ))}
-//   </ul>;
-// }
+function InjestedFileList() {
+  const { inputSource, isValidating, error } = useInjestedSource();
+  if (!inputSource) return <ul></ul>
+  return <ul>
+    {inputSource.map((file, index) => (
+      <li className="pseudo-tabulate-row" key={index + file.filename}><input type="button" ></input>{file.filename}</li>
+    ))}
+  </ul>;
+}
 // function InjestedFileList(){
 //   return
 // }
@@ -42,38 +59,38 @@ function InputFileList() {
 //   }));
 // }
 
-class InjestedFileList extends React.Component {
-  
-  constructor(props) {
-    super(props);
-    this.state = {value: 'coconut'};
+// class InjestedFileList extends React.Component {
 
-    this.handleChange = this.handleChange.bind(this);
-    this.handleSubmit = this.handleSubmit.bind(this);
-  }
+//   constructor(props) {
+//     super(props);
+//     this.state = {value: 'coconut'};
 
-  handleChange(event) {
-    this.setState({value: event.target.value});
-  }
+//     this.handleChange = this.handleChange.bind(this);
+//     this.handleSubmit = this.handleSubmit.bind(this);
+//   }
 
-  handleSubmit(event) {
-    alert('Your favorite flavor is: ' + this.state.value);
-    event.preventDefault();
-  }
+//   handleChange(event) {
+//     this.setState({value: event.target.value});
+//   }
 
-  readFS(event) {
-    const { inputSource, isValidating, error } = useInjestedSource();
-  }
+//   handleSubmit(event) {
+//     alert('Your favorite flavor is: ' + this.state.value);
+//     event.preventDefault();
+//   }
 
-  render() {    
-    if (!inputSource) return <ul></ul>
-    return <form onSubmit={this.handleSubmit}>
-      {inputSource.map((file, index) => (
-        <li className="pseudo-tabulate-row" key={index + file.filename}><input type="button" ></input>{file.filename}</li>
-      ))}
-    </form>
-  }
-}
+//   readFS(event) {
+//     const { inputSource, isValidating, error } = useInjestedSource();
+//   }
+
+//   render() {    
+//     if (!inputSource) return <ul></ul>
+//     return <form onSubmit={this.handleSubmit}>
+//       {inputSource.map((file, index) => (
+//         <li className="pseudo-tabulate-row" key={index + file.filename}><input type="button" ></input>{file.filename}</li>
+//       ))}
+//     </form>
+//   }
+// }
 
 function App() {
   return (
@@ -113,10 +130,10 @@ function App() {
           <TransactionEditorTable />
           <input type="submit" name="injest" formaction="http://localhost:5000/injest-data" method="POST" value="injest-data"></input>
         </div>
-        </div>
-        <div id='metrics' className='department'><h2>Metrics</h2>
-        </div>
       </div>
+      <div id='metrics' className='department'><h2>Metrics</h2>
+      </div>
+    </div>
   );
 };
 export default App;

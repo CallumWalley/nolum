@@ -15,7 +15,6 @@ from flask import request
 import logging
 logging.basicConfig(level=logging.DEBUG)
 
-
 app = Flask(__name__)
 
 dataPath = "../data"
@@ -23,7 +22,6 @@ dataPath = "../data"
 # Gross global variable.
 input_files = []
 DbSession = mdl.create_session_maker()
-
 
 def ls(dataPath):
     outlist = []
@@ -87,7 +85,6 @@ def inputfiles():
             selected_file_all = map(lambda x: x["filename"]==selected_file,all_files)
             if len(list(selected_file_all)) != 1:
                 print(list(selected_file_all), file=sys.stderr)
-
                 raise Exception("Couldn't even.")
             with open(selected_file_all[0]["path"]) as csv_file:
                 csv_reader = csv.reader(csv_file, delimiter=',')
